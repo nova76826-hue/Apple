@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>His Apple</title>
+  <meta name="referrer" content="no-referrer">
+  <style>
+    body { margin: 0; background: #212529; color: white; text-align: center; font-family: sans-serif; }
+    .reader { max-width: 800px; margin: auto; }
+    .controls { background: #212529; padding: 10px; position: sticky; display: flex; justify-content: center; gap: 10px; }
+    button, select { padding: 10px; background: #133951; color: #FFFFFF; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;}
+    select { background: #133951; }
+    #manga-container img { width: 100%; display: block; }
+    #chapter-title { padding: 15px; margin: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="reader">
+    <h2 id="chapter-title">Loading...</h2>
+    <div class="controls">
+    <div class="controls"><a href="https://nova76826-hue.github.io/Project/"><button style="border-radius: 20px;">&#8962;</button></a></div>
+    <select id="chapter-select" onchange="jumpToChapter(this.value)"></select>
+    </div>
+    
+    <div class="controls">
+      
+      <button onclick="prevChapter()">⬅ Previous Chapter</button>
+      <button onclick="nextChapter()">Next Chapter ➡</button>
+    </div>
+
+    
+    <div id="manga-container"></div>
+
+    <div class="controls" style="position: static; margin: 20px 0;">
+      <button onclick="prevChapter()">⬅ Previous Chapter</button>
+      <button onclick="nextChapter()">Next Chapter ➡</button>
+    </div>
+  </div>
+
+  <script>
+    // --- CONFIGURATION WITH SKIP LIST ---
+    const mangaConfig = {
+          "Chapter 1": {
+            base: "https://j24n.wowpic5.store/ii/bEqPbYfoNT0GmyHlNjaftB5o5rERZ/",
+            pages: 35,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 2": {
+            base: "https://80pd.wowpic2.store/ii/bEqPbYfoMT0Gm23lLkaftB5Q4oUJV/",
+            pages: 24,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 3": {
+            base: "https://ek10.wowpic4.store/ii/bEqPbYfoNT0GmmnlBj6ftBJYyrUtd/",
+            pages: 15,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 4": {
+            base: "https://j24n.wowpic1.store/ii/bEqPbYfoPT0Gm2nkRkqftB5A1rEda/",
+            pages: 26,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 5": {
+            base: "https://j24n.wowpic2.store/ii/bEqPbYfoPT0GmynkajaftB5A1rEdU/",
+            pages: 27,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 6": {
+            base: "https://j24n.wowpic4.store/ii/bEqPbYfoMT0GmkXlKi6ftB5A1rUtc/",
+            pages: 40,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 7": {
+            base: "https://jdpw.wowpic2.store/ii/bEqPbYfoPT0Gm03lClaftB5A1rkFd/",
+            pages: 41,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 8": {
+            base: "https://jloo.wowpic2.store/ii/bEqPbYfoNT0GmynlPiqftB5A1rkNZ/",
+            pages: 33,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 9": {
+            base: "https://ek10.wowpic2.store/ii/bEqPbYfoOT0GmyXlHgaftB5A1rkRc/",
+            pages: 37,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 10": {
+            base: "https://jdpw.wowpic2.store/ii/bEqPbYfoMT0Gm1nlBhqftB5A1r0NV/",
+            pages: 35,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 11": {
+            base: "https://ek10.wowpic1.store/ii/bEqPbYfoMT0GmkHkf16ftB5A1r0Zb/",
+            pages: 31,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 12": {
+            base: "https://jloo.wowpic5.store/ii/bEqPbYfoNT0GmzHlBl6ftB5A1r0tb/",
+            pages: 33,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 13": {
+            base: "https://j24n.wowpic3.store/ii/bEqPbYfoNT0GmwHlFlKftB5A1r0Rf/",
+            pages: 21,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 14": {
+            base: "https://80pd.wowpic4.store/ii/bEqPbYfoKT0GmznlEhaftB5A1oEZc/",
+            pages: 23,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          },
+          "Chapter 15": {
+            base: "https://jdpw.wowpic3.store/ii/bEqPbYfoOT0GmyXlNhqftB5A1oEtc/",
+            pages: 19,
+            ext: ".webp",
+            digits: 2,
+            skip: []
+          }
+    };
+    const STORAGE_KEY = "mangaIndex_hisapple";
+    let chapterKeys = Object.keys(mangaConfig);
+    let currentChapterIndex = parseInt(localStorage.getItem("STORAGE_KEY")) || 0;
+
+    function loadChapter() {
+      let chapterName = chapterKeys[currentChapterIndex];
+      let config = mangaConfig[chapterName];
+      let container = document.getElementById("manga-container");
+      
+      document.getElementById("chapter-title").innerText = chapterName;
+      document.getElementById("chapter-select").value = currentChapterIndex;
+      container.innerHTML = ""; 
+
+      for (let i = 1; i <= config.pages; i++) {
+        
+        // --- OPTION 2 LOGIC: CHECK SKIP LIST ---
+        if (config.skip && config.skip.includes(i)) {
+          console.log(`Skipping page: ${i}`);
+          continue; // This stops the loop for this number and moves to the next
+        }
+
+        let img = document.createElement("img");
+        let pageNum = i.toString().padStart(config.digits, '0');
+        
+        img.src = config.base + pageNum + config.ext;
+        img.loading = "lazy";
+        
+        // We still keep the error check just in case!
+        img.onerror = function() { this.remove(); };
+        
+        container.appendChild(img);
+      }
+
+      localStorage.setItem("STORAGE_KEY", currentChapterIndex);
+      window.scrollTo(0, 0);
+    }
+
+    // Navigation Helpers
+    function init() {
+      const select = document.getElementById("chapter-select");
+      chapterKeys.forEach((name, index) => {
+        let opt = document.createElement("option");
+        opt.value = index;
+        opt.innerText = name;
+        select.appendChild(opt);
+      });
+      loadChapter();
+    }
+
+    function jumpToChapter(index) { currentChapterIndex = parseInt(index); loadChapter(); }
+    function nextChapter() { if(currentChapterIndex < chapterKeys.length - 1) { currentChapterIndex++; loadChapter(); } }
+    function prevChapter() { if(currentChapterIndex > 0) { currentChapterIndex--; loadChapter(); } }
+
+    init();
+  </script>
+</body>
+</html>
