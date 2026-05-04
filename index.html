@@ -150,7 +150,7 @@
     };
     const STORAGEKEY = "mangaIndex_hisapple";
     let chapterKeys = Object.keys(mangaConfig);
-    let currentChapterIndex = parseInt(localStorage.getItem("STORAGEKEY")) || 0;
+    let currentChapterIndex = parseInt(localStorage.getItem(STORAGEKEY)) || 0;
 
     function loadChapter() {
       let chapterName = chapterKeys[currentChapterIndex];
@@ -181,7 +181,7 @@
         container.appendChild(img);
       }
 
-      localStorage.setItem("STORAGEKEY", currentChapterIndex);
+      localStorage.setItem(STORAGEKEY, currentChapterIndex);
       window.scrollTo(0, 0);
     }
 
